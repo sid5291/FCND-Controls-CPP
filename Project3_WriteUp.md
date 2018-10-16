@@ -2,14 +2,14 @@
 ###### Implemented by Siddhartha Kumar ####
 
 
-####1. Body Rate Controller:
+#### 1. Body Rate Controller:
    - *Input: Angular Rate commands and current estimate in Bodyframe*
    - *Output: Moment Commands in Body Frame*
    - The Body Controller is a First order P controller.
    - The `KpPQR` proportional Gain is used to calculate `ubarpqr` i.e, the Angular acceleration command
    - Moment Commands = Angular Acceleration * Moments of Inertia
 
-####2. Roll Pitch Controller:
+#### 2. Roll Pitch Controller:
    - *Input: Lateral Acceleration Commands, Body Attitude and Collective Thrust*
    - *Output: Angular Rate Commands in the body frame*
    - The angular components of the collective thrust in the inertial frame for the x and y axis are calculated
@@ -19,7 +19,7 @@
    - The `KpBank` Proportional gain is used to calculate the rate of change of the x and y angular components
    - These are then rotated into the body frame to calculate the angular rates in the body frame i.e,`pqrcmd`
    
-####3. Altitude Controller:
+#### 3. Altitude Controller:
    - *Input: Desired Altitude, vertical velocity, current z position and attitude*
    - *Output: Collective Thrust*
    - The Altitude Controller is implemented as a Cascaded Proportional and  Proportional Integral Controller
@@ -30,19 +30,19 @@
         * Is calculated by using a PI controller with `KpVel` as the proportional Gain and `KiPosZ` as the integrator Gain
         * Is Upwards in the Inertial frame, hence it is subtracted from the gravitational acceleration and then rotated to provide Collective Thrust in the Body Frame
    
-####4. Lateral Position Controller:
+#### 4. Lateral Position Controller:
    - *Input: Desired Lateral Position, velocity, current xy position*
    - *Output: Lateral Accelerations*
    - A Cascaded Double Proportional Controller is used
    - `KpPosXY` and `KpVelXY` are the proportional gains to calculate Commanded Velocity and Acceleration
    - Commanded Velocity and Acceleration are constrained by the provided Maximum XY Velocity and Acceleration
    
-####5. Yaw Controller:
+#### 5. Yaw Controller:
    - *Input: Desired Yaw and current Yaw*
    - *Output: YawRate Command*
    - A simple First Order P controller is used to calculate Commanded Yaw rate using the `KpYaw` proportional Gain
 
-####6. Generate Motor Commands:
+#### 6. Generate Motor Commands:
    - *Input: Commanded Thrust and Moments*
    - *Output: Thrust Command per Fan*
    - Factors To consider for this function:
