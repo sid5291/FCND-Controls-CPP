@@ -69,16 +69,11 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // You'll need the arm length parameter L, and the drag/thrust ratio kappa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-//    collThrustCmd = mass * float(CONST_GRAVITY);
-//    momentCmd.x = 0;
-//    momentCmd.y = 0;
-//    momentCmd.z = 0;
   const float sqrt2 = sqrt(float(2.0));
   cmd.desiredThrustsN[0] = float(0.25) * (collThrustCmd + (momentCmd.x * sqrt2/L) + (momentCmd.y * sqrt2/L) - (momentCmd.z/kappa));
   cmd.desiredThrustsN[1] = float(0.25) * (collThrustCmd - (momentCmd.x * sqrt2/L) + (momentCmd.y * sqrt2/L) + (momentCmd.z/kappa));
   cmd.desiredThrustsN[2] = float(0.25) * (collThrustCmd + (momentCmd.x * sqrt2/L) - (momentCmd.y * sqrt2/L) + (momentCmd.z/kappa));
   cmd.desiredThrustsN[3] = float(0.25) * (collThrustCmd - (momentCmd.x * sqrt2/L) - (momentCmd.y * sqrt2/L) - (momentCmd.z/kappa));
-//  printf("Motor Thrust %f,%f,%f,%f\n", cmd.desiredThrustsN[0],cmd.desiredThrustsN[1],cmd.desiredThrustsN[2],cmd.desiredThrustsN[3]);
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return cmd;
@@ -136,7 +131,7 @@ V3F QuadControl::RollPitchControl(V3F accelCmd, Quaternion<float> attitude, floa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
   V3F R3Vec(R(0,2),R(1,2),R(2,2));
-  V3F bCmd = accelCmd / (collThrustCmd/mass);
+  V3F bCmd = accelCmd / (-1 * (collThrustCmd/mass));
   bCmd.x = CONSTRAIN(bCmd.x, -maxTiltAngle, maxTiltAngle);
   bCmd.y = CONSTRAIN(bCmd.y, -maxTiltAngle, maxTiltAngle);
   V3F bDotCmd = (bCmd - R3Vec) * kpBank;
@@ -180,15 +175,16 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
   auto posZerror = posZCmd - posZ;
+  velZCmd +=  kpPosZ * posZerror;
   // Prevent Integrator Windup
-  if(velZCmd < -1 * maxAscentRate or velZCmd > maxDescentRate) {
+  if((velZCmd >= (-1 * maxAscentRate)) or (velZCmd <= maxDescentRate)) {
       integratedAltitudeError +=  (posZerror * dt);
   } else {
       integratedAltitudeError = 0.0;
   }
   velZCmd = CONSTRAIN(velZCmd,-1 * maxAscentRate,maxDescentRate);
   auto velZerror = velZCmd - velZ;
-  auto ubarz = accelZCmd +  kpPosZ * posZerror + kpVelZ * velZerror + KiPosZ * integratedAltitudeError;
+  auto ubarz = accelZCmd  + kpVelZ * velZerror + KiPosZ * integratedAltitudeError;
   thrust = mass * ((static_cast<float>(CONST_GRAVITY) - ubarz)/R(2,2));
   /////////////////////////////// END STUDENT CODE ////////////////////////////
   
@@ -240,9 +236,6 @@ V3F QuadControl::LateralPositionControl(V3F posCmd, V3F velCmd, V3F pos, V3F vel
   }
   // Ensure to not command z in lateral controller
   accelCmd[2] = 0.0;
-  printf("Lateral ePos: %f, %f, %f\n", ePos[0], ePos[1], ePos[2]);
-  printf("Lateral eVel: %f, %f, %f\n", eVel[0], eVel[1], eVel[2]);
-
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return accelCmd;
@@ -284,7 +277,6 @@ VehicleCommand QuadControl::RunControl(float dt, float simTime)
   collThrustCmd = CONSTRAIN(collThrustCmd, (minMotorThrust+ thrustMargin)*4.f, (maxMotorThrust-thrustMargin)*4.f);
   
   V3F desAcc = LateralPositionControl(curTrajPoint.position, curTrajPoint.velocity, estPos, estVel, curTrajPoint.accel);
-  printf("Lateral Accels: %f, %f, %f\n", desAcc[0], desAcc[1], desAcc[2]);
   V3F desOmega = RollPitchControl(desAcc, estAtt, collThrustCmd);
   desOmega.z = YawControl(curTrajPoint.attitude.Yaw(), estAtt.Yaw());
 

@@ -17,13 +17,13 @@ QuadControlParams.Trajectory=0,0,-1
 # initial conditions
 Quad.InitialPos=0,0,-1
 Quad.InitialVel=0,0,0
-Quad.InitialYPR=.7,0,0
+Quad.InitialYPR=0,0,0
 Quad.InitialOmega=30,0,0
 
 # graphing commands
-Commands.1=AddGraph1.Quad.Pos.Z
+Commands.1=AddGraph1.Quad.Pos.X
 Commands.2=AddGraph1.AbsThreshold(Quad.Roll,0.03,0.1)
-Commands.3=AddGraph2.Quad.Vel.Z
+Commands.3=AddGraph2.Quad.Vel.X
 Commands.4=AddGraph2.AbsThreshold(Quad.Omega.X,3,0.1)
 Commands.5=AddGraph1.WindowThreshold(Quad.Roll,0.025,0.75)
 Commands.6=AddGraph2.WindowThreshold(Quad.Omega.X,2.5,0.75)
